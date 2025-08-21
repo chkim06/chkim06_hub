@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광고 성과 & 확정거래액 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .period {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
+        
+        .dashboard {
+            display: none;
+        }
+        
+        .dashboard.active {
+            display: block;
+        }
+        
+        .nav-buttons {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn.active {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .media-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+        
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .media-card.google {
+            border-left: 5px solid #4285F4;
+        }
+        
+        .media-card.meta {
+            border-left: 5px solid #1877F2;
+        }
+        
+        .media-card.tiktok {
+            border-left: 5px solid #FF0050;
+        }
+        
+        .media-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .media-name {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .media-name.google { color: #4285F4; }
+        .media-name.meta { color: #1877F2; }
+        .media-name.tiktok { color: #FF0050; }
+        
+        .roas-badge {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 12px;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .summary-table {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .clickable-media {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        
+        .clickable-media:hover {
+            color: #4285F4;
+            text-decoration: underline;
+        }
+        
+        .click-hint {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .revenue-table {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .revenue-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .revenue-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .revenue-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 광고 성과 & 확정거래액 대시보드</h1>
+            <div class="period">2025년 6~7월 데이터</div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showDashboard('performance')">🎯 광고 성과</button>
+            <button class="nav-btn" onclick="showDashboard('revenue')">💰 확정거래액</button>
+        </div>
+        
+        <!-- 광고 성과 대시보드 -->
+        <div id="performance-dashboard" class="dashboard active">
+            <div class="cards-grid">
+                <!-- 구글 카드 -->
+                <div class="media-card google animate-in" onclick="showMediaRevenue('구글')">
+                    <div class="media-header">
+                        <div class="media-name google">🔍 구글</div>
+                        <div class="roas-badge">ROAS 226%</div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">광고비</div>
+                            <div class="metric-value">308억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환매출</div>
+                            <div class="metric-value">696억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환수</div>
+                            <div class="metric-value">232만건</div>
+                        </div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">0.74%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CVR</div>
+                            <div class="metric-value">4.27%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CPC</div>
+                            <div class="metric-value">568원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 메타 카드 -->
+                <div class="media-card meta animate-in" onclick="showMediaRevenue('메타')">
+                    <div class="media-header">
+                        <div class="media-name meta">📘 메타</div>
+                        <div class="roas-badge">ROAS 358%</div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">광고비</div>
+                            <div class="metric-value">191억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환매출</div>
+                            <div class="metric-value">683억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환수</div>
+                            <div class="metric-value">98만건</div>
+                        </div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">2.34%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CVR</div>
+                            <div class="metric-value">3.88%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CPC</div>
+                            <div class="metric-value">752원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 틱톡 카드 -->
+                <div class="media-card tiktok animate-in" onclick="showMediaRevenue('틱톡')">
+                    <div class="media-header">
+                        <div class="media-name tiktok">🎵 틱톡</div>
+                        <div class="roas-badge">ROAS 270%</div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">광고비</div>
+                            <div class="metric-value">98억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환매출</div>
+                            <div class="metric-value">264억원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">전환수</div>
+                            <div class="metric-value">44만건</div>
+                        </div>
+                    </div>
+                    <div class="metrics-row">
+                        <div class="metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">5.46%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CVR</div>
+                            <div class="metric-value">0.86%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">CPC</div>
+                            <div class="metric-value">189원</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 종합 테이블 -->
+            <div class="summary-table animate-in">
+                <h2>📈 광고 성과 종합 비교</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>매체</th>
+                                <th>광고비</th>
+                                <th>전환매출</th>
+                                <th>ROAS</th>
+                                <th>노출수</th>
+                                <th>클릭수</th>
+                                <th>전환수</th>
+                                <th>CTR</th>
+                                <th>CVR</th>
+                                <th>CPC</th>
+                                <th>CPA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="clickable-media" onclick="showMediaRevenue('구글')">🔍 구글</td>
+                                <td>308억원</td>
+                                <td>696억원</td>
+                                <td><strong>226%</strong></td>
+                                <td>73억</td>
+                                <td>5,432만</td>
+                                <td>232만</td>
+                                <td>0.74%</td>
+                                <td>4.27%</td>
+                                <td>568원</td>
+                                <td>13,309원</td>
+                            </tr>
+                            <tr>
+                                <td class="clickable-media" onclick="showMediaRevenue('메타')">📘 메타</td>
+                                <td>191억원</td>
+                                <td>683억원</td>
+                                <td><strong>358%</strong></td>
+                                <td>11억</td>
+                                <td>2,538만</td>
+                                <td>98만</td>
+                                <td>2.34%</td>
+                                <td>3.88%</td>
+                                <td>752원</td>
+                                <td>19,379원</td>
+                            </tr>
+                            <tr>
+                                <td class="clickable-media" onclick="showMediaRevenue('틱톡')">🎵 틱톡</td>
+                                <td>98억원</td>
+                                <td>264억원</td>
+                                <td><strong>270%</strong></td>
+                                <td>9억</td>
+                                <td>5,167만</td>
+                                <td>44만</td>
+                                <td>5.46%</td>
+                                <td>0.86%</td>
+                                <td>189원</td>
+                                <td>21,992원</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="click-hint">💡 매체명을 클릭하면 확정거래액 상세 정보를 확인할 수 있습니다</div>
+            </div>
+        </div>
+        
+        <!-- 확정거래액 대시보드 -->
+        <div id="revenue-dashboard" class="dashboard">
+            <button class="back-btn" onclick="showDashboard('performance')">← 광고 성과로 돌아가기</button>
+            
+            <div class="revenue-table animate-in">
+                <h2>💰 확정거래액 상세 분석</h2>
+                
+                <!-- 구글 -->
+                <div class="revenue-card" id="google-revenue">
+                    <div class="revenue-header" style="color: #4285F4;">🔍 구글 확정거래액</div>
+                    <div class="revenue-metrics">
+                        <div class="metric">
+                            <div class="metric-label">확정거래액</div>
+                            <div class="metric-value" style="color: #4285F4;">337억 5천만원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">거래건수</div>
+                            <div class="metric-value">580건</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">평균거래액</div>
+                            <div class="metric-value">5,819만원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 메타 -->
+                <div class="revenue-card" id="meta-revenue">
+                    <div class="revenue-header" style="color: #1877F2;">📘 메타(페이스북) 확정거래액</div>
+                    <div class="revenue-metrics">
+                        <div class="metric">
+                            <div class="metric-label">확정거래액</div>
+                            <div class="metric-value" style="color: #1877F2;">203억 7천만원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">거래건수</div>
+                            <div class="metric-value">775건</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">평균거래액</div>
+                            <div class="metric-value">2,628만원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 틱톡 -->
+                <div class="revenue-card" id="tiktok-revenue">
+                    <div class="revenue-header" style="color: #FF0050;">🎵 틱톡 확정거래액</div>
+                    <div class="revenue-metrics">
+                        <div class="metric">
+                            <div class="metric-label">확정거래액</div>
+                            <div class="metric-value" style="color: #FF0050;">92억 7천만원</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">거래건수</div>
+                            <div class="metric-value">346건</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">평균거래액</div>
+                            <div class="metric-value">2,680만원</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 종합 비교 테이블 -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>매체</th>
+                                <th>확정거래액</th>
+                                <th>거래건수</th>
+                                <th>평균거래액</th>
+                                <th>시장점유율</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>🔍 구글</strong></td>
+                                <td><strong>337억 5천만원</strong></td>
+                                <td>580건</td>
+                                <td><strong>5,819만원</strong></td>
+                                <td>53.4%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>📘 메타</strong></td>
+                                <td><strong>203억 7천만원</strong></td>
+                                <td><strong>775건</strong></td>
+                                <td>2,628만원</td>
+                                <td>32.2%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>🎵 틱톡</strong></td>
+                                <td><strong>92억 7천만원</strong></td>
+                                <td>346건</td>
+                                <td>2,680만원</td>
+                                <td>14.7%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showDashboard(type) {
+            // 모든 대시보드 숨기기
+            document.querySelectorAll('.dashboard').forEach(d => {
+                d.classList.remove('active');
+            });
+            
+            // 모든 네비게이션 버튼 비활성화
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 선택된 대시보드 표시
+            if (type === 'performance') {
+                document.getElementById('performance-dashboard').classList.add('active');
+                document.querySelector('.nav-btn').classList.add('active');
+            } else if (type === 'revenue') {
+                document.getElementById('revenue-dashboard').classList.add('active');
+                document.querySelectorAll('.nav-btn')[1].classList.add('active');
+            }
+            
+            // 애니메이션 효과
+            setTimeout(() => {
+                document.querySelectorAll('.animate-in').forEach(el => {
+                    el.style.animation = 'fadeInUp 0.6s ease-out';
+                });
+            }, 100);
+        }
+        
+        function showMediaRevenue(media) {
+            // 확정거래액 대시보드로 전환
+            showDashboard('revenue');
+            
+            // 해당 매체 카드 하이라이트
+            setTimeout(() => {
+                document.querySelectorAll('.revenue-card').forEach(card => {
+                    card.style.opacity = '0.3';
+                });
+                
+                let targetCard;
+                if (media === '구글') {
+                    targetCard = document.getElementById('google-revenue');
+                } else if (media === '메타') {
+                    targetCard = document.getElementById('meta-revenue');
+                } else if (media === '틱톡') {
+                    targetCard = document.getElementById('tiktok-revenue');
+                }
+                
+                if (targetCard) {
+                    targetCard.style.opacity = '1';
+                    targetCard.style.transform = 'scale(1.05)';
+                    targetCard.style.boxShadow = '0 15px 40px rgba(0,0,0,0.2)';
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // 3초 후 원래대로
+                    setTimeout(() => {
+                        document.querySelectorAll('.revenue-card').forEach(card => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                            card.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
+                        });
+                    }, 3000);
+                }
+            }, 500);
+        }
+        
+        // 초기 애니메이션
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.animate-in').forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>

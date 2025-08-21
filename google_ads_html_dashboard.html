@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구글 광고 대시보드 - 2025년 월별 확정거래액 추이</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1f2937;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+        
+        .header-line {
+            width: 80px;
+            height: 4px;
+            background: #3b82f6;
+            margin: 0 auto;
+        }
+        
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .kpi-content h3 {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        
+        .kpi-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .icon-blue { background: #dbeafe; color: #3b82f6; }
+        .icon-green { background: #dcfce7; color: #16a34a; }
+        .icon-purple { background: #e9d5ff; color: #9333ea; }
+        .icon-orange { background: #fed7aa; color: #ea580c; }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+        
+        .table-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .table-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .trend-up { color: #16a34a; }
+        .trend-down { color: #dc2626; }
+        .trend-neutral { color: #6b7280; }
+        
+        .insights-section {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .insights-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .insight-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .insight-card h4 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .insight-card p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🚀 구글 광고 대시보드</h1>
+            <p>2025년 월별 확정거래액 추이 분석</p>
+            <div class="header-line"></div>
+        </div>
+
+        <!-- KPI 카드 -->
+        <div class="kpi-cards">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-content">
+                        <h3>총 거래액</h3>
+                        <div class="kpi-value">1,051.0억원</div>
+                        <div class="kpi-sub">1월~7월 누적</div>
+                    </div>
+                    <div class="kpi-icon icon-blue">💰</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-content">
+                        <h3>평균 성장률</h3>
+                        <div class="kpi-value">+3.9%</div>
+                        <div class="kpi-sub">월평균 증가율</div>
+                    </div>
+                    <div class="kpi-icon icon-green">📈</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-content">
+                        <h3>최대 거래액</h3>
+                        <div class="kpi-value">181.7억원</div>
+                        <div class="kpi-sub">7월 달성</div>
+                    </div>
+                    <div class="kpi-icon icon-purple">🎯</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-content">
+                        <h3>전체 성장률</h3>
+                        <div class="kpi-value">+38.4%</div>
+                        <div class="kpi-sub">1월 대비 7월</div>
+                    </div>
+                    <div class="kpi-icon icon-orange">🚀</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 섹션 -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3 class="chart-title">월별 확정거래액 추이</h3>
+                <div class="chart-container">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">월별 거래 건수</h3>
+                <div class="chart-container">
+                    <canvas id="countChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터 테이블 -->
+        <div class="table-section">
+            <h3 class="table-title">월별 상세 데이터</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>월</th>
+                        <th style="text-align: right;">확정거래액</th>
+                        <th style="text-align: right;">거래건수</th>
+                        <th style="text-align: right;">전월 대비</th>
+                        <th style="text-align: center;">추세</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>2025년 1월</strong></td>
+                        <td style="text-align: right;"><strong>131.3억원</strong></td>
+                        <td style="text-align: right;">268건</td>
+                        <td style="text-align: right;" class="trend-neutral">-</td>
+                        <td style="text-align: center;">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2025년 2월</strong></td>
+                        <td style="text-align: right;"><strong>137.7억원</strong></td>
+                        <td style="text-align: right;">272건</td>
+                        <td style="text-align: right;" class="trend-up">+4.9%</td>
+                        <td style="text-align: center;">📈</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2025년 3월</strong></td>
+                        <td style="text-align: right;"><strong>156.7억원</strong></td>
+                        <td style="text-align: right;">275건</td>
+                        <td style="text-align: right;" class="trend-up">+13.8%</td>
+                        <td style="text-align: center;">📈</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2025년 4월</strong></td>
+                        <td style="text-align: right;"><strong>149.7억원</strong></td>
+                        <td style="text-align: right;">297건</td>
+                        <td style="text-align: right;" class="trend-down">-4.5%</td>
+                        <td style="text-align: center;">📉</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2025년 5월</strong></td>
+                        <td style="text-align: right;"><strong>156.3억원</strong></td>
+                        <td style="text-align: right;">280건</td>
+                        <td style="text-align: right;" class="trend-up">+4.4%</td>
+                        <td style="text-align: center;">📈</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2025년 6월</strong></td>
+                        <td style="text-align: right;"><strong>155.8억원</strong></td>
+                        <td style="text-align: right;">280건</td>
+                        <td style="text-align: right;" class="trend-down">-0.3%</td>
+                        <td style="text-align: center;">📉</td>
+                    </tr>
+                    <tr style="background: #f0f9ff;">
+                        <td><strong>2025년 7월</strong></td>
+                        <td style="text-align: right;"><strong>181.7억원</strong></td>
+                        <td style="text-align: right;">300건</td>
+                        <td style="text-align: right;" class="trend-up"><strong>+16.6%</strong></td>
+                        <td style="text-align: center;">🚀</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 인사이트 섹션 -->
+        <div class="insights-section">
+            <h3 class="insights-title">📊 주요 인사이트</h3>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <h4>성장 트렌드</h4>
+                    <p>1월 131.3억원에서 7월 181.7억원으로 <strong>38.4% 성장</strong>을 달성했습니다. 특히 7월에 급성장을 보였습니다.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>최고 성과</h4>
+                    <p>7월에 <strong>181.7억원</strong>으로 최대 거래액을 기록하며, 전월 대비 <strong>16.6% 증가</strong>로 가장 높은 성장률을 보였습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 데이터 정의
+        const data = [
+            { month: '1월', volume: 131.3, count: 268 },
+            { month: '2월', volume: 137.7, count: 272 },
+            { month: '3월', volume: 156.7, count: 275 },
+            { month: '4월', volume: 149.7, count: 297 },
+            { month: '5월', volume: 156.3, count: 280 },
+            { month: '6월', volume: 155.8, count: 280 },
+            { month: '7월', volume: 181.7, count: 300 }
+        ];
+
+        // 거래액 차트
+        const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+        new Chart(volumeCtx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.month),
+                datasets: [{
+                    label: '확정거래액 (억원)',
+                    data: data.map(d => d.volume),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 3,
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `거래액: ${context.parsed.y}억원`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 120,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '억';
+                            },
+                            color: '#6b7280'
+                        },
+                        grid: {
+                            color: '#f3f4f6'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#6b7280'
+                        },
+                        grid: {
+                            color: '#f3f4f6'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 거래 건수 차트
+        const countCtx = document.getElementById('countChart').getContext('2d');
+        new Chart(countCtx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.month),
+                datasets: [{
+                    label: '거래건수',
+                    data: data.map(d => d.count),
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `거래건수: ${context.parsed.y}건`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 250,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '건';
+                            },
+                            color: '#6b7280'
+                        },
+                        grid: {
+                            color: '#f3f4f6'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#6b7280'
+                        },
+                        grid: {
+                            color: '#f3f4f6'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
