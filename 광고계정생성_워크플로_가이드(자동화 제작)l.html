@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>광고계정생성 워크플로 대시보드</title>
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --text:#0f172a; --primary:#2563eb;
+      --border:#e5e7eb; --amber:#f59e0b; --green:#16a34a; --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Noto Sans KR,Arial; color:var(--text); background:var(--bg)}
+    .container{max-width:1100px; margin:0 auto; padding:24px}
+    header{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; justify-content:space-between}
+    h1{font-size: clamp(20px,3vw,28px); margin:0}
+    .subtitle{color:var(--muted); font-size:14px}
+    .search{display:flex; gap:8px; align-items:center; background:#fff; padding:10px 12px; border:1px solid var(--border); border-radius:999px; min-width:280px; flex:1}
+    .search input{border:0; outline:0; width:100%; font-size:14px}
+    .legend{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:18px 0}
+    @media(min-width:900px){.legend{grid-template-columns:repeat(4,1fr)}}
+    .legend-item{display:flex; gap:8px; align-items:center; background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px}
+    .tabs{margin-top:12px}
+    .tablist{display:flex; flex-wrap:wrap; gap:8px; padding:8px}
+    .tab-btn{padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:#fff; cursor:pointer; font-size:13px}
+    .tab-btn[aria-selected="true"]{background:var(--primary); color:#fff; border-color:var(--primary)}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 4px 20px rgba(0,0,0,.04)}
+    .card-header{padding:18px 18px 0 18px}
+    .badges{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+    .badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; border-radius:999px; padding:6px 10px; border:1px solid var(--border); background:#fff}
+    .badge.primary{background:#eef2ff; border-color:#c7d2fe}
+    .badge.outline{background:#fff}
+    .title{font-size: clamp(18px,2.4vw,22px); margin:10px 0 4px 0}
+    .muted{color:var(--muted); font-size:13px}
+    .card-body{padding:16px 18px 22px 18px}
+    .steps{display:grid; gap:10px}
+    .step{border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:linear-gradient(#fff,#fff)}
+    .step-head{display:flex; align-items:center; gap:8px}
+    .chip{display:inline-flex; width:24px; height:24px; border-radius:999px; border:1px solid var(--border); align-items:center; justify-content:center; font-size:12px}
+    .flex-spacer{margin-left:auto; display:flex; gap:8px; opacity:.75}
+    .ul{margin:6px 0 0 0; padding-left:18px}
+    .ul li{font-size:14px; color:#374151; margin:4px 0}
+    .ex-wrap{margin-top:12px}
+    .ex-title{display:flex; align-items:center; gap:6px; color:#92400e; font-weight:600}
+    .ex-grid{display:grid; gap:8px; margin-top:6px}
+    @media(min-width:900px){.ex-grid{grid-template-columns:repeat(2,1fr)}}
+    .ex-card{padding:10px 12px; border-radius:12px; border:1px solid #fde68a; background:#fffbeb}
+    .links{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .btn{border:1px solid var(--border); background:#fff; border-radius:999px; padding:8px 12px; font-size:13px; text-decoration:none; color:inherit}
+    footer{color:var(--muted); font-size:12px; margin-top:20px}
+    .hide{display:none!important}
+    .fade{animation:fade .25s ease}
+    @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+    /* icons */
+    .i{width:16px; height:16px; vertical-align:middle}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>광고계정생성 워크플로 가이드</h1>
+        <div class="subtitle">분기(action_id)별 진행 액션 · 예외 처리 · 완료 신호를 한 눈에</div>
+      </div>
+      <label class="search" title="검색">
+        <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input id="q" placeholder="검색: action_id, 단계, 역할, 키워드…"/>
+      </label>
+    </header>
+
+    <section class="legend">
+      <div class="legend-item"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a1 1 0 0 0 1 1h4"></path><path d="M13 3v7a1 1 0 0 0 1 1h4"></path><path d="M6 21v-5a1 1 0 0 1 1-1h10"></path></svg><span>분기(Action)</span></div>
+      <div class="legend-item"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"></path><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg><span>완료 신호</span></div>
+      <div class="legend-item"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path></svg><span>DB</span></div>
+      <div class="legend-item"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"></path></svg><span>API/서비스</span></div>
+    </section>
+
+    <section class="tabs">
+      <div id="tablist" class="tablist" role="tablist" aria-label="워크플로 분기"></div>
+      <div id="panels"></div>
+    </section>
+
+    <footer>본 대시보드는 n8n 워크플로(JSON) 정의를 기반으로 한 운영 가이드입니다. 실제 작동은 워크플로에 설정된 권한·조건에 따릅니다.</footer>
+  </div>
+
+<script>
+  const BRANCHES = [
+    {
+      key: 'msg posted',
+      title: '광고 신청 : msg posted',
+      intent: 'Slack 봇 메시지 수신 시 신청정보 파싱 및 초기 레코드 생성',
+      who: ['봇 자동'],
+      trigger: '이벤트 type = message (subtype=bot_message)',
+      next: '수수료 ‘기본/예외’에 따라 분기',
+      steps: [
+        { label: '신청 정보 파싱', icons:['db'], details:[
+          '몰ID / 진행매체 / 수수료 적용여부(기본·예외) / 수수료율·컨펌링크 추출',
+          '매체별 고유값(구글=ggl, 틱톡=ttk, 메타=fab) 계산',
+        ]},
+        { label: 'DB 저장', icons:['db'], details:[
+          'ad_account_creation_list 에 신청 레코드 upsert',
+          '기본 적용 시 매체별 기본 수수료율 자동 세팅(구글/메타 13, 틱톡 0)',
+        ]},
+        { label: '신청건 존재/담당자 지정 확인', icons:['api','slack'], details:[
+          'CMC API로 신청건 조회',
+          '담당자 미지정 시 스레드 알림',
+        ]},
+        { label: '다음 액션 안내', icons:['slack'], details:[
+          '기본 → ‘광고대행메뉴오픈’ 버튼 노출',
+          '예외 → ‘수수료율 변경’ 버튼 노출',
+        ]},
+      ],
+      exceptions:[{title:'신청 내역 미존재', items:['스레드로 재확인 요청']}],
+    },
+    {
+      key: 'feerate change',
+      title: '수수료율 변경 : feerate change',
+      intent: '예외 수수료 건을 CMC 고객관리창(API)과 공용DB에 반영',
+      who: ['계정생성 담당자(srchoi, sgmoon, hjhwang01, chkim06)'],
+      trigger: '버튼 action_id = feerate change',
+      next: '수수료 반영 후 컨펌 버튼 제공',
+      steps: [
+        {label:'권한 확인', icons:['slack'], details:['버튼 클릭자 username 화이트리스트 체크']},
+        {label:'CMC API 갱신', icons:['api'], details:['advertisement-application-i PUT으로 COMMISSION.RATE 반영']},
+        {label:'DB 업데이트', icons:['db'], details:["ad_account_creation_list.수수료율변경여부='O'"]},
+        {label:'마케터 컨펌 유도', icons:['slack'], details:['‘수수료율 확인 완료’(feerate confirm) 버튼 노출']},
+      ],
+      exceptions:[
+        {title:'중복 데이터로 INSERT 실패', items:['메타일 경우 sgmoon 에페메랄 안내','그 외 srchoi 에페메랄 안내']},
+        {title:'무권한 사용자 클릭', items:['에페메랄로 권한 없음 안내']},
+      ],
+    },
+    {
+      key: 'feerate confirm',
+      title: '수수료율 변경건 점검 완료 : feerate confirm',
+      intent: '마케터가 고객관리창 반영 확인 후 공용DB 동기화 상태를 확정',
+      who: ['요청자 또는 컨설팅담당자','(또는 담당 4인)'],
+      trigger: '버튼 action_id = feerate confirm',
+      next: '광고대행서비스 메뉴 오픈 안내로 진행',
+      steps:[
+        {label:'권한 확인', icons:['slack'], details:['요청자/컨설팅담당자/담당 4인 중인지 확인']},
+        {label:'공용DB 저장', icons:['db'], details:['c_marketing_center.media_fee_rate INSERT IGNORE']},
+        {label:'공용DB 크로스체크', icons:['db','slack'], details:['media_fee_rate에 값 존재 여부 재확인','스레드: ‘공용DB 업데이트 완료’로 버튼 비활성화']},
+        {label:'메뉴 오픈 버튼 제공', icons:['slack'], details:['요청자에게 ‘광고대행메뉴오픈’ 버튼 노출']},
+      ],
+    },
+    {
+      key: 'menu open',
+      title: '메뉴 오픈 : menu open',
+      intent: 'EC 마케팅 메뉴 예외등록(API) 및 최종 오픈 처리',
+      who: ['요청자','컨설팅담당자','담당 4인'],
+      trigger: '버튼 action_id = menu open',
+      doneSignal: '이모지 : :완료12:',
+      steps:[
+        {label:'기오픈 여부 확인', icons:['db'], details:['Google Sheet에 mall_id 존재하면 기오픈 안내']},
+        {label:'예외등록 API 호출', icons:['api'], details:['reporter.cafe24.com except/renew (manage_no=376)']},
+        {label:'성공 처리', icons:['slack','db'], details:['성공(code=2000) → 완료 안내, :완료12: 리액션 추가','ad_account_creation_list.메뉴오픈여부=\'O\'','버튼 비활성화로 상태 고정']},
+      ],
+      exceptions:[{title:'API 오류', items:['담당자 멘션 및 수동 처리 안내','상태 메시지 ‘오류 발생’으로 잠금']}],
+    },
+    {
+      key: 'reaction_added',
+      title: '완료 안내 : reaction_added',
+      intent: '최종 완료 이모지 기반 후속 안내(매체별) 및 문구 고정',
+      who: ['봇 자동'],
+      trigger: 'reaction ‘완료12’',
+      steps:[{label:'매체별 최종 안내', icons:['slack'], details:['예: 메타 – 광고주 안내 가이드 링크 제공','스레드에 완료 코멘트 남기기']}],
+    },
+  ];
+
+  const ICONS = {
+    db:`<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path></svg>`,
+    slack:`<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 14A2.5 2.5 0 1 1 3 11.5V14h2.5ZM8 14V8h2.5v6H8Zm0 2.5A2.5 2.5 0 1 1 5.5 19 2.5 2.5 0 0 1 8 16.5Zm8-8A2.5 2.5 0 1 1 18.5 7H16v2.5ZM16 14h-6v-2h6v2Zm0 2h2.5a2.5 2.5 0 1 1-2.5 2.5V16Z"/></svg>`,
+    api:`<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"></path></svg>`
+  };
+
+  const $ = (s, el=document)=>el.querySelector(s);
+  const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
+
+  function renderTabs(branches){
+    const tablist = $('#tablist');
+    const panels = $('#panels');
+    tablist.innerHTML = '';
+    panels.innerHTML = '';
+
+    branches.forEach((b, idx)=>{
+      const id = `tab-${b.key.replace(/\s+/g,'-')}`;
+      const btn = Object.assign(document.createElement('button'),{
+        className:'tab-btn', role:'tab', id, 'aria-controls':id+'-panel', 'aria-selected': idx===0 ? 'true':'false',
+        innerText:b.title
+      });
+      btn.addEventListener('click',()=>selectTab(id));
+      tablist.appendChild(btn);
+
+      const panel = Object.assign(document.createElement('div'),{
+        id:id+'-panel', role:'tabpanel', className:'fade', hidden: idx!==0
+      });
+      panel.appendChild(renderBranchCard(b));
+      panels.appendChild(panel);
+    });
+  }
+
+  function renderBranchCard(b){
+    const wrap = Object.assign(document.createElement('div'),{className:'card'});
+
+    const header = Object.assign(document.createElement('div'),{className:'card-header'});
+    const badges = Object.assign(document.createElement('div'),{className:'badges'});
+
+    const bd1 = badge(`action_id: ${b.key}`,'outline');
+    const bd2 = badge(b.who.join(' · '),'primary');
+    badges.append(bd1, bd2);
+    if(b.doneSignal){ badges.append(badge('완료 신호: '+b.doneSignal,'outline')); }
+
+    const title = Object.assign(document.createElement('div'),{className:'title', innerText:b.intent});
+    const sub = Object.assign(document.createElement('div'),{className:'muted', innerText:`트리거: ${b.trigger}${b.next? ' → '+b.next:''}`});
+
+    header.append(badges, title, sub);
+
+    const body = Object.assign(document.createElement('div'),{className:'card-body'});
+
+    // steps
+    const steps = Object.assign(document.createElement('div'),{className:'steps'});
+    b.steps.forEach((s, i)=> steps.appendChild(stepRow(s, i+1)) );
+
+    body.appendChild(steps);
+
+    // exceptions
+    if(b.exceptions && b.exceptions.length){
+      const exwrap = Object.assign(document.createElement('div'),{className:'ex-wrap'});
+      const extitle = Object.assign(document.createElement('div'),{className:'ex-title'});
+      extitle.innerHTML = `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg><span>예외 케이스</span>`;
+      const exgrid = Object.assign(document.createElement('div'),{className:'ex-grid'});
+      b.exceptions.forEach(ex =>{
+        const card = Object.assign(document.createElement('div'),{className:'ex-card'});
+        const t = Object.assign(document.createElement('div'),{style:'font-size:14px; font-weight:600', innerText:ex.title});
+        const ul = Object.assign(document.createElement('ul'),{className:'ul'});
+        ex.items.forEach(it=>{ const li=document.createElement('li'); li.textContent=it; ul.appendChild(li); });
+        card.append(t, ul);
+        exgrid.appendChild(card);
+      });
+      exwrap.append(extitle, exgrid);
+      body.appendChild(exwrap);
+    }
+
+    // links
+    const links = Object.assign(document.createElement('div'),{className:'links'});
+    links.append(linkBtn('광고주 안내 가이드','https://mktstory.cafe24.com/201da210-9377-80d0-be94-c58ed0c6ce27'));
+    links.append(linkBtn('EC 예외 적용 툴 위키','https://wiki.simplexi.com/pages/viewpage.action?pageId=828281667'));
+    body.appendChild(links);
+
+    wrap.append(header, body);
+    return wrap;
+  }
+
+  function badge(text, variant='outline'){
+    const el = Object.assign(document.createElement('span'),{className:'badge '+(variant==='primary'?'primary':'outline')});
+    el.textContent = text; return el;
+  }
+
+  function stepRow(step, idx){
+    const row = Object.assign(document.createElement('div'),{className:'step'});
+    const head = Object.assign(document.createElement('div'),{className:'step-head'});
+    const chip = Object.assign(document.createElement('span'),{className:'chip', innerText:idx});
+    const label = Object.assign(document.createElement('div'),{style:'font-weight:600', innerText:step.label});
+    const right = Object.assign(document.createElement('div'),{className:'flex-spacer'});
+    (step.icons||[]).forEach(k=>{ const span=document.createElement('span'); span.innerHTML = ICONS[k]||''; right.appendChild(span); });
+    head.append(chip, label, right);
+
+    const ul = Object.assign(document.createElement('ul'),{className:'ul'});
+    step.details.forEach(d=>{ const li=document.createElement('li'); li.textContent=d; ul.appendChild(li); });
+    row.append(head, ul);
+    return row;
+  }
+
+  function linkBtn(text, href){
+    const a = Object.assign(document.createElement('a'),{className:'btn', href, target:'_blank', rel:'noreferrer'});
+    a.textContent=text; return a;
+  }
+
+  function selectTab(id){
+    $$('.tab-btn').forEach(b=> b.setAttribute('aria-selected','false'));
+    $$('.tabs [role="tabpanel"]').forEach(p=> p.hidden=true);
+    const btn = document.getElementById(id);
+    const panel = document.getElementById(id+'-panel');
+    if(btn && panel){ btn.setAttribute('aria-selected','true'); panel.hidden=false; }
+  }
+
+  function filter(){
+    const needle = $('#q').value.trim().toLowerCase();
+    if(!needle){ renderTabs(BRANCHES); return; }
+    const filtered = BRANCHES.filter(b=>[
+      b.key,b.title,b.intent,b.trigger,(b.who||[]).join(' '),
+      (b.steps||[]).map(s=> s.label + ' ' + (s.details||[]).join(' ')).join(' ')
+    ].join(' ').toLowerCase().includes(needle));
+    renderTabs(filtered.length? filtered : [{key:'empty', title:'검색 결과 없음', intent:'검색 조건에 맞는 분기가 없습니다', who:[], trigger:'', steps:[], exceptions:[] }]);
+  }
+
+  // init
+  renderTabs(BRANCHES);
+  $('#q').addEventListener('input', filter);
+</script>
+</body>
+</html>
